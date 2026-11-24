@@ -15,7 +15,9 @@ import com.nijakaam.repository.JobApplicationRepository;
 import com.nijakaam.repository.JobRepository;
 import com.nijakaam.repository.UserRepository;
 
+import com.nijakaam.enums.NotificationType;
 import com.nijakaam.service.JobApplicationService;
+import com.nijakaam.service.NotificationService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -33,14 +35,17 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     private final JobApplicationRepository jobApplicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public JobApplicationServiceImpl(
             JobApplicationRepository jobApplicationRepository,
             JobRepository jobRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            NotificationService notificationService) {
         this.jobApplicationRepository = jobApplicationRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     // Get currently authenticated user from JWT
@@ -149,7 +154,17 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         application.setCreatedAt(now);
         application.setUpdatedAt(now);
 
-        return jobApplicationRepository.save(application);
+        JobApplication saved = jobApplicationRepository.save(application);
+
+        notificationService.sendNotification(
+                employer.getId(),
+                "New Job Application",
+                "A worker has applied for your job: " + job.getTitle(),
+                NotificationType.NEW_JOB_APPLICATION,
+                saved.getId()
+        );
+
+        return saved;
     }
 
     // Get application by ID
@@ -252,7 +267,29 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         application.setStatus(status);
         application.setUpdatedAt(LocalDateTime.now());
 
-        return jobApplicationRepository.save(application);
+        JobApplication saved = jobApplicationRepository.save(application);
+
+        NotificationType notificationType = (status == ApplicationStatus.ACCEPTED)
+                ? NotificationType.APPLICATION_ACCEPTED
+                : NotificationType.APPLICATION_REJECTED;
+
+        String title = (status == ApplicationStatus.ACCEPTED)
+                ? "Application Accepted"
+                : "Application Rejected";
+
+        String message = (status == ApplicationStatus.ACCEPTED)
+                ? "Your job application has been accepted!"
+                : "Your job application has been rejected.";
+
+        notificationService.sendNotification(
+                saved.getWorkerId(),
+                title,
+                message,
+                notificationType,
+                saved.getId()
+        );
+
+        return saved;
     }
 
     // Worker withdraws their own application
@@ -280,5 +317,13 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         application.setUpdatedAt(LocalDateTime.now());
 
         jobApplicationRepository.save(application);
+
+        notificationService.sendNotification(
+                application.getEmployerId(),
+                "Application Withdrawn",
+                "A worker has withdrawn their job application.",
+                NotificationType.APPLICATION_WITHDRAWN,
+                application.getId()
+        );
     }
 }

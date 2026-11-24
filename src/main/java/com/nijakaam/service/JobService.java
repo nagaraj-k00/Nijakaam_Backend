@@ -1,5 +1,8 @@
 package com.nijakaam.service;
 
+import com.nijakaam.dto.request.JobSearchCriteria;
+import com.nijakaam.dto.response.JobResponse;
+import com.nijakaam.dto.response.PagedResponse;
 import com.nijakaam.entity.Job;
 import com.nijakaam.enums.JobStatus;
 
@@ -22,4 +25,6 @@ public interface JobService {
     Job updateJobStatus(String id, JobStatus status);
 
     void deleteJob(String id);
+
+    PagedResponse<JobResponse> searchJobs(JobSearchCriteria criteria);
 }

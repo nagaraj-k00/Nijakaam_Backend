@@ -92,8 +92,10 @@ class JobControllerAuthorizationTest {
         String requestBody = """
                 {
                     "title": "Hacked Title",
-                    "description": "Hacked Description",
-                    "budget": 999.0
+                    "description": "Hacked Description with more than twenty characters",
+                    "skillsRequired": ["Plumbing"],
+                    "budget": 999.0,
+                    "location": "Bangalore"
                 }
                 """;
 
@@ -127,8 +129,10 @@ class JobControllerAuthorizationTest {
         String requestBody = """
                 {
                     "title": "New Title",
-                    "description": "New Desc",
-                    "budget": 500.0
+                    "description": "New Valid Description with more than twenty characters",
+                    "skillsRequired": ["Plumbing"],
+                    "budget": 500.0,
+                    "location": "Bangalore"
                 }
                 """;
 

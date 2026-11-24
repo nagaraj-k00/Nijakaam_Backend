@@ -30,6 +30,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/worker-profiles", "/api/worker-profiles/**").hasAnyRole("WORKER", "ADMIN")
+                        .requestMatchers("/api/employer-profiles", "/api/employer-profiles/**").hasAnyRole("EMPLOYER", "ADMIN")
+                        .requestMatchers("/api/workers", "/api/workers/**").hasAnyRole("EMPLOYER", "ADMIN")
+                        .requestMatchers("/api/notifications", "/api/notifications/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,9 +1,17 @@
+
 package com.nijakaam.controller;
 
+import com.nijakaam.dto.request.CreateJobRequest;
+import com.nijakaam.dto.request.JobSearchCriteria;
 import com.nijakaam.dto.response.ApiResponse;
+import com.nijakaam.dto.response.JobResponse;
+import com.nijakaam.dto.response.PagedResponse;
 import com.nijakaam.entity.Job;
 import com.nijakaam.enums.JobStatus;
 import com.nijakaam.service.JobService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +30,37 @@ public class JobController {
 
     // Create Job
     @PostMapping
-    public ResponseEntity<ApiResponse<Job>> createJob(@RequestBody Job job) {
+    public ResponseEntity<ApiResponse<Job>> createJob(
+            @Valid @RequestBody CreateJobRequest request) {
+
+        Job job = mapToJob(request);
 
         Job createdJob = jobService.createJob(job);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Job created successfully", createdJob));
+    }
+
+    // Search Jobs
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PagedResponse<JobResponse>>> searchJobs(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String skill,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Double minBudget,
+            @RequestParam(required = false) Double maxBudget,
+            @RequestParam(required = false) JobStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        JobSearchCriteria criteria = new JobSearchCriteria(
+                keyword, skill, location, minBudget, maxBudget, status, page, size, sortBy, sortDir);
+
+        PagedResponse<JobResponse> result = jobService.searchJobs(criteria);
+
+        return ResponseEntity.ok(ApiResponse.success("Jobs retrieved successfully", result));
     }
 
     // Get Job By ID
@@ -70,7 +103,9 @@ public class JobController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Job>> updateJob(
             @PathVariable String id,
-            @RequestBody Job job) {
+            @Valid @RequestBody CreateJobRequest request) {
+
+        Job job = mapToJob(request);
 
         Job updatedJob = jobService.updateJob(id, job);
 
@@ -98,5 +133,19 @@ public class JobController {
 
         return ResponseEntity.ok(
                 ApiResponse.success("Job deleted successfully", null));
+    }
+
+    // Map Request DTO to Job Entity
+    private Job mapToJob(CreateJobRequest request) {
+
+        Job job = new Job();
+
+        job.setTitle(request.getTitle());
+        job.setDescription(request.getDescription());
+        job.setSkillsRequired(request.getSkillsRequired());
+        job.setBudget(request.getBudget());
+        job.setLocation(request.getLocation());
+
+        return job;
     }
 }

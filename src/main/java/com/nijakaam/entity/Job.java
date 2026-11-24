@@ -2,6 +2,7 @@ package com.nijakaam.entity;
 
 import com.nijakaam.enums.JobStatus;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "jobs")
+@CompoundIndex(name = "job_status_created_idx", def = "{'status': 1, 'createdAt': -1}")
+@CompoundIndex(name = "job_status_location_idx", def = "{'status': 1, 'location': 1}")
 public class Job {
 
     @Id

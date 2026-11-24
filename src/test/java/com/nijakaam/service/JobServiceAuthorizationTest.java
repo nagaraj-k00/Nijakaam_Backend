@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,6 +38,9 @@ class JobServiceAuthorizationTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private MongoTemplate mongoTemplate;
 
     @InjectMocks
     private JobServiceImpl jobService;

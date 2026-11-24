@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document(collection = "employer_profiles")
 public class EmployerProfile {
 
@@ -18,6 +20,8 @@ public class EmployerProfile {
     private String companyWebsite;
     private String location;
     private String industry;
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     public EmployerProfile() {
     }
@@ -29,6 +33,8 @@ public class EmployerProfile {
         this.companyWebsite = companyWebsite;
         this.location = location;
         this.industry = industry;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public String getId() {
@@ -85,5 +91,21 @@ public class EmployerProfile {
 
     public void setIndustry(String industry) {
         this.industry = industry;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

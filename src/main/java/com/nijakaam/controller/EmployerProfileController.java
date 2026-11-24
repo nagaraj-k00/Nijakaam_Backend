@@ -1,7 +1,11 @@
 package com.nijakaam.controller;
 
+import com.nijakaam.dto.request.EmployerProfileRequest;
+import com.nijakaam.dto.response.ApiResponse;
+import com.nijakaam.dto.response.EmployerProfileResponse;
 import com.nijakaam.entity.EmployerProfile;
 import com.nijakaam.service.EmployerProfileService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,45 +20,66 @@ public class EmployerProfileController {
         this.employerProfileService = employerProfileService;
     }
 
-    // Create employer profile
-    @PostMapping("/{userId}")
-    public ResponseEntity<EmployerProfile> createProfile(
-            @PathVariable String userId,
-            @RequestBody EmployerProfile profile) {
+    // Create employer profile (canonical endpoint deriving userId from authenticated JWT)
+    @PostMapping
+    public ResponseEntity<ApiResponse<EmployerProfileResponse>> createProfile(
+            @Valid @RequestBody EmployerProfileRequest request) {
 
-        EmployerProfile createdProfile = employerProfileService.createProfile(profile, userId);
+        EmployerProfile createdProfile = employerProfileService.createProfile(request);
 
-        return new ResponseEntity<>(createdProfile, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Employer profile created successfully", EmployerProfileResponse.fromEntity(createdProfile)));
     }
 
-    // Get employer profile
+    // Create employer profile with path-based userId (backward compatibility, strictly checks authorization)
+    @PostMapping("/{userId}")
+    public ResponseEntity<ApiResponse<EmployerProfileResponse>> createProfileWithPath(
+            @PathVariable String userId,
+            @Valid @RequestBody EmployerProfileRequest request) {
+
+        EmployerProfile createdProfile = employerProfileService.createProfile(request, userId);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Employer profile created successfully", EmployerProfileResponse.fromEntity(createdProfile)));
+    }
+
+    // Get current authenticated employer's profile
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<EmployerProfileResponse>> getMyProfile() {
+
+        EmployerProfile profile = employerProfileService.getMyProfile();
+
+        return ResponseEntity.ok(ApiResponse.success("Employer profile retrieved successfully", EmployerProfileResponse.fromEntity(profile)));
+    }
+
+    // Get employer profile by userId
     @GetMapping("/{userId}")
-    public ResponseEntity<EmployerProfile> getProfile(
+    public ResponseEntity<ApiResponse<EmployerProfileResponse>> getProfile(
             @PathVariable String userId) {
 
         EmployerProfile profile = employerProfileService.getProfileByUserId(userId);
 
-        return ResponseEntity.ok(profile);
+        return ResponseEntity.ok(ApiResponse.success("Employer profile retrieved successfully", EmployerProfileResponse.fromEntity(profile)));
     }
 
     // Update employer profile
     @PutMapping("/{userId}")
-    public ResponseEntity<EmployerProfile> updateProfile(
+    public ResponseEntity<ApiResponse<EmployerProfileResponse>> updateProfile(
             @PathVariable String userId,
-            @RequestBody EmployerProfile profile) {
+            @Valid @RequestBody EmployerProfileRequest request) {
 
-        EmployerProfile updatedProfile = employerProfileService.updateProfile(userId, profile);
+        EmployerProfile updatedProfile = employerProfileService.updateProfile(userId, request);
 
-        return ResponseEntity.ok(updatedProfile);
+        return ResponseEntity.ok(ApiResponse.success("Employer profile updated successfully", EmployerProfileResponse.fromEntity(updatedProfile)));
     }
 
     // Delete employer profile
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteProfile(
+    public ResponseEntity<ApiResponse<Void>> deleteProfile(
             @PathVariable String userId) {
 
         employerProfileService.deleteProfile(userId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Employer profile deleted successfully", null));
     }
 }
