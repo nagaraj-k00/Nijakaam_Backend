@@ -26,11 +26,14 @@ public class Job {
     public Job() {
     }
 
-    public Job(String title, String description, String employerId, List<String> skillsRequired, Double budget, String location) {
+    public Job(String title, String description, String employerId, List<String> skillsRequired, Double budget,
+            String location) {
         this.title = title;
         this.description = description;
         this.employerId = employerId;
-        this.skillsRequired = skillsRequired;
+        this.skillsRequired = skillsRequired != null
+                ? new ArrayList<>(skillsRequired)
+                : new ArrayList<>();
         this.budget = budget;
         this.location = location;
         this.status = JobStatus.OPEN;

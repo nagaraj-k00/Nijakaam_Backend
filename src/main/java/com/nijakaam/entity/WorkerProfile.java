@@ -3,6 +3,7 @@ package com.nijakaam.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,19 +24,24 @@ public class WorkerProfile {
     private String location;
     private boolean available = true;
     private Double rating = 0.0;
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     public WorkerProfile() {
     }
 
-    public WorkerProfile(String userId, List<String> skills, Integer experienceYears, Double hourlyRate, String bio, String location) {
+    public WorkerProfile(String userId, List<String> skills, Integer experienceYears, Double hourlyRate, String bio,
+            String location) {
         this.userId = userId;
-        this.skills = skills;
+        this.skills = skills != null ? new ArrayList<>(skills) : new ArrayList<>();
         this.experienceYears = experienceYears;
         this.hourlyRate = hourlyRate;
         this.bio = bio;
         this.location = location;
         this.available = true;
         this.rating = 0.0;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public String getId() {

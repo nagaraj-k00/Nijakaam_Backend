@@ -63,4 +63,20 @@ public class JobServiceImpl implements JobService {
         }
         jobRepository.deleteById(id);
     }
+
+    @Override
+    public Job updateJob(String id, Job updatedJob) {
+
+        Job existingJob = getJobById(id);
+
+        existingJob.setTitle(updatedJob.getTitle());
+        existingJob.setDescription(updatedJob.getDescription());
+        existingJob.setSkillsRequired(updatedJob.getSkillsRequired());
+        existingJob.setBudget(updatedJob.getBudget());
+        existingJob.setLocation(updatedJob.getLocation());
+
+        existingJob.setUpdatedAt(LocalDateTime.now());
+
+        return jobRepository.save(existingJob);
+    }
 }

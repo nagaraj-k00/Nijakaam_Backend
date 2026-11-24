@@ -10,5 +10,12 @@ import java.util.List;
 @Repository
 public interface JobRepository extends MongoRepository<Job, String> {
     List<Job> findByEmployerId(String employerId);
+
     List<Job> findByStatus(JobStatus status);
+
+    List<Job> findByLocationIgnoreCase(String location);
+
+    List<Job> findByStatusAndLocationIgnoreCase(
+            JobStatus status,
+            String location);
 }
