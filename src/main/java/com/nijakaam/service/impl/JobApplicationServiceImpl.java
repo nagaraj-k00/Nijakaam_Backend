@@ -1,17 +1,28 @@
+
 package com.nijakaam.service.impl;
 
 import com.nijakaam.entity.Job;
 import com.nijakaam.entity.JobApplication;
 import com.nijakaam.entity.User;
+
 import com.nijakaam.enums.ApplicationStatus;
 import com.nijakaam.enums.JobStatus;
 import com.nijakaam.enums.Role;
+
 import com.nijakaam.exception.ResourceNotFoundException;
+
 import com.nijakaam.repository.JobApplicationRepository;
 import com.nijakaam.repository.JobRepository;
 import com.nijakaam.repository.UserRepository;
+
 import com.nijakaam.service.JobApplicationService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,58 +38,116 @@ public class JobApplicationServiceImpl implements JobApplicationService {
             JobApplicationRepository jobApplicationRepository,
             JobRepository jobRepository,
             UserRepository userRepository) {
-
         this.jobApplicationRepository = jobApplicationRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+    }
+
+    // Get currently authenticated user from JWT
+    private User getCurrentUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication.getPrincipal().equals("anonymousUser")) {
+
+            throw new AccessDeniedException("User is not authenticated");
+        }
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    // Verify user role
+    private void validateRole(User user, Role expectedRole) {
+
+        if (user.getRole() != expectedRole) {
+            throw new AccessDeniedException(
+                    "Only " + expectedRole + " users can perform this operation");
+        }
+    }
+
+    // Verify employer owns the job
+    private Job getOwnedJob(String jobId, User employer) {
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+
+        if (!job.getEmployerId().equals(employer.getId())) {
+            throw new AccessDeniedException(
+                    "You are not authorized to access this job");
+        }
+
+        return job;
+    }
+
+    // Verify access to an application
+    private JobApplication getAccessibleApplication(String id, User user) {
+
+        JobApplication application = jobApplicationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+
+        if (user.getRole() == Role.ADMIN) {
+            return application;
+        }
+
+        boolean isWorker = user.getRole() == Role.WORKER &&
+                application.getWorkerId().equals(user.getId());
+
+        boolean isEmployer = user.getRole() == Role.EMPLOYER &&
+                application.getEmployerId().equals(user.getId());
+
+        if (!isWorker && !isEmployer) {
+            throw new AccessDeniedException(
+                    "You are not authorized to access this application");
+        }
+
+        return application;
     }
 
     // Worker applies for a job
     @Override
     public JobApplication applyForJob(JobApplication application) {
 
-        // Verify worker exists
-        User worker = userRepository.findById(application.getWorkerId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Worker not found"));
+        User worker = getCurrentUser();
 
-        // Verify worker role
-        if (worker.getRole() != Role.WORKER) {
-            throw new RuntimeException("Only workers can apply for jobs");
-        }
+        validateRole(worker, Role.WORKER);
 
-        // Verify job exists
         Job job = jobRepository.findById(application.getJobId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
-        // Check job availability
         if (job.getStatus() != JobStatus.OPEN) {
-            throw new RuntimeException("This job is not accepting applications");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "This job is not accepting applications");
         }
 
-        // Prevent duplicate applications
         if (jobApplicationRepository.existsByWorkerIdAndJobId(
-                application.getWorkerId(), application.getJobId())) {
+                worker.getId(), job.getId())) {
 
-            throw new RuntimeException("You have already applied for this job");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "You have already applied for this job");
         }
 
-        // Verify employer exists
         User employer = userRepository.findById(job.getEmployerId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Employer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Employer not found"));
 
-        if (employer.getRole() != Role.EMPLOYER) {
-            throw new RuntimeException("Invalid employer account");
-        }
+        validateRole(employer, Role.EMPLOYER);
 
-        // Set trusted employer ID from the job
-        application.setEmployerId(job.getEmployerId());
+        // Set trusted IDs from database, not request body
+        application.setWorkerId(worker.getId());
+        application.setEmployerId(employer.getId());
 
         application.setStatus(ApplicationStatus.PENDING);
-        application.setCreatedAt(LocalDateTime.now());
-        application.setUpdatedAt(LocalDateTime.now());
+
+        LocalDateTime now = LocalDateTime.now();
+
+        application.setCreatedAt(now);
+        application.setUpdatedAt(now);
 
         return jobApplicationRepository.save(application);
     }
@@ -87,48 +156,97 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     @Override
     public JobApplication getApplicationById(String id) {
 
-        return jobApplicationRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Application not found with id: " + id));
+        User currentUser = getCurrentUser();
+
+        return getAccessibleApplication(id, currentUser);
     }
 
     // Get worker applications
     @Override
     public List<JobApplication> getApplicationsByWorker(String workerId) {
 
-        return jobApplicationRepository.findByWorkerId(workerId);
+        User currentUser = getCurrentUser();
+
+        if (currentUser.getRole() == Role.ADMIN) {
+            return jobApplicationRepository.findByWorkerId(workerId);
+        }
+
+        validateRole(currentUser, Role.WORKER);
+
+        if (!currentUser.getId().equals(workerId)) {
+            throw new AccessDeniedException(
+                    "You can only view your own applications");
+        }
+
+        return jobApplicationRepository.findByWorkerId(currentUser.getId());
     }
 
     // Get employer applications
     @Override
     public List<JobApplication> getApplicationsByEmployer(String employerId) {
 
-        return jobApplicationRepository.findByEmployerId(employerId);
+        User currentUser = getCurrentUser();
+
+        if (currentUser.getRole() == Role.ADMIN) {
+            return jobApplicationRepository.findByEmployerId(employerId);
+        }
+
+        validateRole(currentUser, Role.EMPLOYER);
+
+        if (!currentUser.getId().equals(employerId)) {
+            throw new AccessDeniedException(
+                    "You can only view your own applications");
+        }
+
+        return jobApplicationRepository.findByEmployerId(currentUser.getId());
     }
 
     // Get applications for a particular job
     @Override
     public List<JobApplication> getApplicationsByJob(String jobId) {
 
+        User currentUser = getCurrentUser();
+
+        if (currentUser.getRole() == Role.ADMIN) {
+            return jobApplicationRepository.findByJobId(jobId);
+        }
+
+        validateRole(currentUser, Role.EMPLOYER);
+
+        getOwnedJob(jobId, currentUser);
+
         return jobApplicationRepository.findByJobId(jobId);
     }
 
-    // Accept or reject application
+    // Employer accepts or rejects application
     @Override
     public JobApplication updateApplicationStatus(
-            String id, ApplicationStatus status) {
+            String id,
+            ApplicationStatus status) {
 
-        JobApplication application = getApplicationById(id);
+        User employer = getCurrentUser();
+
+        validateRole(employer, Role.EMPLOYER);
+
+        JobApplication application = getAccessibleApplication(id, employer);
+
+        if (!application.getEmployerId().equals(employer.getId())) {
+            throw new AccessDeniedException(
+                    "You cannot update this application");
+        }
 
         if (application.getStatus() != ApplicationStatus.PENDING) {
-            throw new RuntimeException(
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
                     "Only pending applications can be updated");
         }
 
-        if (status != ApplicationStatus.ACCEPTED
-                && status != ApplicationStatus.REJECTED) {
-            throw new RuntimeException("Invalid application status");
+        if (status != ApplicationStatus.ACCEPTED &&
+                status != ApplicationStatus.REJECTED) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only ACCEPTED or REJECTED status is allowed");
         }
 
         application.setStatus(status);
@@ -137,14 +255,24 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         return jobApplicationRepository.save(application);
     }
 
-    // Withdraw application
+    // Worker withdraws their own application
     @Override
     public void withdrawApplication(String id) {
 
-        JobApplication application = getApplicationById(id);
+        User worker = getCurrentUser();
+
+        validateRole(worker, Role.WORKER);
+
+        JobApplication application = getAccessibleApplication(id, worker);
+
+        if (!application.getWorkerId().equals(worker.getId())) {
+            throw new AccessDeniedException(
+                    "You can only withdraw your own application");
+        }
 
         if (application.getStatus() != ApplicationStatus.PENDING) {
-            throw new RuntimeException(
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
                     "Only pending applications can be withdrawn");
         }
 
