@@ -81,6 +81,12 @@ public class WorkerProfileServiceImpl implements WorkerProfileService {
         profile.setSkills(request.getSkills() != null ? new ArrayList<>(request.getSkills()) : new ArrayList<>());
         profile.setExperienceYears(request.getExperienceYears());
         profile.setHourlyRate(request.getHourlyRate());
+        profile.setDailyRate(request.getDailyRate());
+        if (request.getCertifications() != null) {
+            profile.setCertifications(new ArrayList<>(request.getCertifications()));
+        }
+        profile.setPreferredShift(request.getPreferredShift());
+        profile.setAvatarUrl(request.getAvatarUrl());
         profile.setBio(request.getBio());
         profile.setLocation(request.getLocation());
         profile.setAvailable(request.getAvailable() != null ? request.getAvailable() : true);
@@ -148,6 +154,18 @@ public class WorkerProfileServiceImpl implements WorkerProfileService {
         }
         if (request.getHourlyRate() != null) {
             existingProfile.setHourlyRate(request.getHourlyRate());
+        }
+        if (request.getDailyRate() != null) {
+            existingProfile.setDailyRate(request.getDailyRate());
+        }
+        if (request.getCertifications() != null) {
+            existingProfile.setCertifications(new ArrayList<>(request.getCertifications()));
+        }
+        if (request.getPreferredShift() != null) {
+            existingProfile.setPreferredShift(request.getPreferredShift());
+        }
+        if (request.getAvatarUrl() != null) {
+            existingProfile.setAvatarUrl(request.getAvatarUrl());
         }
         if (request.getBio() != null) {
             existingProfile.setBio(request.getBio());

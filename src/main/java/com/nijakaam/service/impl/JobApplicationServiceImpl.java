@@ -14,6 +14,7 @@ import com.nijakaam.exception.ResourceNotFoundException;
 import com.nijakaam.repository.JobApplicationRepository;
 import com.nijakaam.repository.JobRepository;
 import com.nijakaam.repository.UserRepository;
+import com.nijakaam.repository.WorkerProfileRepository;
 
 import com.nijakaam.enums.NotificationType;
 import com.nijakaam.service.JobApplicationService;
@@ -35,16 +36,19 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     private final JobApplicationRepository jobApplicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final WorkerProfileRepository workerProfileRepository;
     private final NotificationService notificationService;
 
     public JobApplicationServiceImpl(
             JobApplicationRepository jobApplicationRepository,
             JobRepository jobRepository,
             UserRepository userRepository,
+            WorkerProfileRepository workerProfileRepository,
             NotificationService notificationService) {
         this.jobApplicationRepository = jobApplicationRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.workerProfileRepository = workerProfileRepository;
         this.notificationService = notificationService;
     }
 
@@ -146,6 +150,20 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         // Set trusted IDs from database, not request body
         application.setWorkerId(worker.getId());
         application.setEmployerId(employer.getId());
+        application.setWorkerName(worker.getName());
+        application.setWorkerEmail(worker.getEmail());
+        application.setWorkerPhone(worker.getPhone());
+        application.setJobTitle(job.getTitle());
+
+        workerProfileRepository.findByUserId(worker.getId()).ifPresent(profile -> {
+            if (profile.getSkills() != null) {
+                application.setWorkerSkills(profile.getSkills());
+            }
+            application.setWorkerLocation(profile.getLocation());
+            application.setWorkerRating(profile.getRating());
+            application.setExperienceYears(profile.getExperienceYears());
+            application.setWorkerAvatarUrl(profile.getAvatarUrl());
+        });
 
         application.setStatus(ApplicationStatus.PENDING);
 
@@ -167,13 +185,37 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         return saved;
     }
 
+    private JobApplication enrichApplication(JobApplication app) {
+        if (app == null) return null;
+        if (app.getWorkerName() == null || app.getJobTitle() == null) {
+            userRepository.findById(app.getWorkerId()).ifPresent(u -> {
+                if (app.getWorkerName() == null) app.setWorkerName(u.getName());
+                if (app.getWorkerEmail() == null) app.setWorkerEmail(u.getEmail());
+                if (app.getWorkerPhone() == null) app.setWorkerPhone(u.getPhone());
+            });
+            if (app.getJobTitle() == null && app.getJobId() != null) {
+                jobRepository.findById(app.getJobId()).ifPresent(j -> app.setJobTitle(j.getTitle()));
+            }
+            if (app.getWorkerSkills() == null || app.getWorkerSkills().isEmpty()) {
+                workerProfileRepository.findByUserId(app.getWorkerId()).ifPresent(p -> {
+                    if (p.getSkills() != null) app.setWorkerSkills(p.getSkills());
+                    if (app.getWorkerLocation() == null) app.setWorkerLocation(p.getLocation());
+                    if (app.getWorkerRating() == null) app.setWorkerRating(p.getRating());
+                    if (app.getExperienceYears() == null) app.setExperienceYears(p.getExperienceYears());
+                    if (app.getWorkerAvatarUrl() == null) app.setWorkerAvatarUrl(p.getAvatarUrl());
+                });
+            }
+        }
+        return app;
+    }
+
     // Get application by ID
     @Override
     public JobApplication getApplicationById(String id) {
 
         User currentUser = getCurrentUser();
 
-        return getAccessibleApplication(id, currentUser);
+        return enrichApplication(getAccessibleApplication(id, currentUser));
     }
 
     // Get worker applications
@@ -183,7 +225,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         User currentUser = getCurrentUser();
 
         if (currentUser.getRole() == Role.ADMIN) {
-            return jobApplicationRepository.findByWorkerId(workerId);
+            return jobApplicationRepository.findByWorkerId(workerId).stream().map(this::enrichApplication).toList();
         }
 
         validateRole(currentUser, Role.WORKER);
@@ -193,7 +235,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                     "You can only view your own applications");
         }
 
-        return jobApplicationRepository.findByWorkerId(currentUser.getId());
+        return jobApplicationRepository.findByWorkerId(currentUser.getId()).stream().map(this::enrichApplication).toList();
     }
 
     // Get employer applications
@@ -203,7 +245,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         User currentUser = getCurrentUser();
 
         if (currentUser.getRole() == Role.ADMIN) {
-            return jobApplicationRepository.findByEmployerId(employerId);
+            return jobApplicationRepository.findByEmployerId(employerId).stream().map(this::enrichApplication).toList();
         }
 
         validateRole(currentUser, Role.EMPLOYER);
@@ -213,7 +255,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                     "You can only view your own applications");
         }
 
-        return jobApplicationRepository.findByEmployerId(currentUser.getId());
+        return jobApplicationRepository.findByEmployerId(currentUser.getId()).stream().map(this::enrichApplication).toList();
     }
 
     // Get applications for a particular job
@@ -223,14 +265,14 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         User currentUser = getCurrentUser();
 
         if (currentUser.getRole() == Role.ADMIN) {
-            return jobApplicationRepository.findByJobId(jobId);
+            return jobApplicationRepository.findByJobId(jobId).stream().map(this::enrichApplication).toList();
         }
 
         validateRole(currentUser, Role.EMPLOYER);
 
         getOwnedJob(jobId, currentUser);
 
-        return jobApplicationRepository.findByJobId(jobId);
+        return jobApplicationRepository.findByJobId(jobId).stream().map(this::enrichApplication).toList();
     }
 
     // Employer accepts or rejects application
@@ -250,18 +292,20 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                     "You cannot update this application");
         }
 
-        if (application.getStatus() != ApplicationStatus.PENDING) {
+        if (application.getStatus() != ApplicationStatus.PENDING &&
+                application.getStatus() != ApplicationStatus.SHORTLISTED) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Only pending applications can be updated");
+                    "Only pending or shortlisted applications can be updated");
         }
 
         if (status != ApplicationStatus.ACCEPTED &&
-                status != ApplicationStatus.REJECTED) {
+                status != ApplicationStatus.REJECTED &&
+                status != ApplicationStatus.SHORTLISTED) {
 
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Only ACCEPTED or REJECTED status is allowed");
+                    "Only ACCEPTED, REJECTED, or SHORTLISTED status is allowed");
         }
 
         application.setStatus(status);
@@ -269,17 +313,23 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
         JobApplication saved = jobApplicationRepository.save(application);
 
-        NotificationType notificationType = (status == ApplicationStatus.ACCEPTED)
-                ? NotificationType.APPLICATION_ACCEPTED
-                : NotificationType.APPLICATION_REJECTED;
+        NotificationType notificationType;
+        String title;
+        String message;
 
-        String title = (status == ApplicationStatus.ACCEPTED)
-                ? "Application Accepted"
-                : "Application Rejected";
-
-        String message = (status == ApplicationStatus.ACCEPTED)
-                ? "Your job application has been accepted!"
-                : "Your job application has been rejected.";
+        if (status == ApplicationStatus.ACCEPTED) {
+            notificationType = NotificationType.APPLICATION_ACCEPTED;
+            title = "Application Accepted";
+            message = "Your job application has been accepted!";
+        } else if (status == ApplicationStatus.SHORTLISTED) {
+            notificationType = NotificationType.APPLICATION_SHORTLISTED;
+            title = "Application Shortlisted";
+            message = "Your job application has been shortlisted!";
+        } else {
+            notificationType = NotificationType.APPLICATION_REJECTED;
+            title = "Application Rejected";
+            message = "Your job application has been rejected.";
+        }
 
         notificationService.sendNotification(
                 saved.getWorkerId(),
@@ -289,7 +339,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                 saved.getId()
         );
 
-        return saved;
+        return enrichApplication(saved);
     }
 
     // Worker withdraws their own application

@@ -82,6 +82,18 @@ public class EmployerProfileServiceImpl implements EmployerProfileService {
         profile.setCompanyWebsite(request.getCompanyWebsite());
         profile.setLocation(request.getLocation());
         profile.setIndustry(request.getIndustry());
+        profile.setGstin(request.getGstin());
+        profile.setMsmeUdyamNumber(request.getMsmeUdyamNumber());
+        profile.setOrgScale(request.getOrgScale());
+        profile.setContactName(request.getContactName());
+        profile.setContactPhone(request.getContactPhone());
+        profile.setContactEmail(request.getContactEmail());
+        profile.setContactDesignation(request.getContactDesignation());
+        profile.setLogoUrl(request.getLogoUrl());
+        profile.setBannerUrl(request.getBannerUrl());
+        if (request.getEscrowBalance() != null) {
+            profile.setEscrowBalance(request.getEscrowBalance());
+        }
         profile.setCreatedAt(LocalDateTime.now());
         profile.setUpdatedAt(LocalDateTime.now());
 
@@ -151,6 +163,36 @@ public class EmployerProfileServiceImpl implements EmployerProfileService {
         }
         if (request.getIndustry() != null) {
             existingProfile.setIndustry(request.getIndustry());
+        }
+        if (request.getGstin() != null) {
+            existingProfile.setGstin(request.getGstin());
+        }
+        if (request.getMsmeUdyamNumber() != null) {
+            existingProfile.setMsmeUdyamNumber(request.getMsmeUdyamNumber());
+        }
+        if (request.getOrgScale() != null) {
+            existingProfile.setOrgScale(request.getOrgScale());
+        }
+        if (request.getContactName() != null) {
+            existingProfile.setContactName(request.getContactName());
+        }
+        if (request.getContactPhone() != null) {
+            existingProfile.setContactPhone(request.getContactPhone());
+        }
+        if (request.getContactEmail() != null) {
+            existingProfile.setContactEmail(request.getContactEmail());
+        }
+        if (request.getContactDesignation() != null) {
+            existingProfile.setContactDesignation(request.getContactDesignation());
+        }
+        if (request.getLogoUrl() != null) {
+            existingProfile.setLogoUrl(request.getLogoUrl());
+        }
+        if (request.getBannerUrl() != null) {
+            existingProfile.setBannerUrl(request.getBannerUrl());
+        }
+        if (request.getEscrowBalance() != null) {
+            existingProfile.setEscrowBalance(request.getEscrowBalance());
         }
         existingProfile.setUpdatedAt(LocalDateTime.now());
 

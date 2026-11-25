@@ -13,6 +13,16 @@ public class EmployerProfileResponse {
     private String companyWebsite;
     private String location;
     private String industry;
+    private String gstin;
+    private String msmeUdyamNumber;
+    private String orgScale;
+    private String contactName;
+    private String contactPhone;
+    private String contactEmail;
+    private String contactDesignation;
+    private String logoUrl;
+    private String bannerUrl;
+    private Double escrowBalance;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -37,7 +47,7 @@ public class EmployerProfileResponse {
         if (profile == null) {
             return null;
         }
-        return new EmployerProfileResponse(
+        EmployerProfileResponse response = new EmployerProfileResponse(
                 profile.getId(),
                 profile.getUserId(),
                 profile.getCompanyName(),
@@ -48,6 +58,17 @@ public class EmployerProfileResponse {
                 profile.getCreatedAt(),
                 profile.getUpdatedAt()
         );
+        response.setGstin(profile.getGstin());
+        response.setMsmeUdyamNumber(profile.getMsmeUdyamNumber());
+        response.setOrgScale(profile.getOrgScale());
+        response.setContactName(profile.getContactName());
+        response.setContactPhone(profile.getContactPhone());
+        response.setContactEmail(profile.getContactEmail());
+        response.setContactDesignation(profile.getContactDesignation());
+        response.setLogoUrl(profile.getLogoUrl());
+        response.setBannerUrl(profile.getBannerUrl());
+        response.setEscrowBalance(profile.getEscrowBalance());
+        return response;
     }
 
     public String getId() {
@@ -120,5 +141,85 @@ public class EmployerProfileResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getGstin() {
+        return gstin;
+    }
+
+    public void setGstin(String gstin) {
+        this.gstin = gstin;
+    }
+
+    public String getMsmeUdyamNumber() {
+        return msmeUdyamNumber;
+    }
+
+    public void setMsmeUdyamNumber(String msmeUdyamNumber) {
+        this.msmeUdyamNumber = msmeUdyamNumber;
+    }
+
+    public String getOrgScale() {
+        return orgScale;
+    }
+
+    public void setOrgScale(String orgScale) {
+        this.orgScale = orgScale;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getContactDesignation() {
+        return contactDesignation;
+    }
+
+    public void setContactDesignation(String contactDesignation) {
+        this.contactDesignation = contactDesignation;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+
+    public void setBannerUrl(String bannerUrl) {
+        this.bannerUrl = bannerUrl;
+    }
+
+    public Double getEscrowBalance() {
+        return escrowBalance;
+    }
+
+    public void setEscrowBalance(Double escrowBalance) {
+        this.escrowBalance = escrowBalance;
     }
 }

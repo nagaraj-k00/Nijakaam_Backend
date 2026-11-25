@@ -62,6 +62,16 @@ public class EmployerProfileController {
         return ResponseEntity.ok(ApiResponse.success("Employer profile retrieved successfully", EmployerProfileResponse.fromEntity(profile)));
     }
 
+    // Update current authenticated employer's profile
+    @PutMapping
+    public ResponseEntity<ApiResponse<EmployerProfileResponse>> updateMyProfile(
+            @Valid @RequestBody EmployerProfileRequest request) {
+
+        EmployerProfile updatedProfile = employerProfileService.updateProfile(null, request);
+
+        return ResponseEntity.ok(ApiResponse.success("Employer profile updated successfully", EmployerProfileResponse.fromEntity(updatedProfile)));
+    }
+
     // Update employer profile
     @PutMapping("/{userId}")
     public ResponseEntity<ApiResponse<EmployerProfileResponse>> updateProfile(

@@ -8,6 +8,8 @@ public class AuthResponse {
     private String type = "Bearer";
     private String userId;
     private String email;
+    private String name;
+    private String phone;
     private Role role;
 
     public AuthResponse() {
@@ -17,6 +19,15 @@ public class AuthResponse {
         this.token = token;
         this.userId = userId;
         this.email = email;
+        this.role = role;
+    }
+
+    public AuthResponse(String token, String userId, String email, String name, String phone, Role role) {
+        this.token = token;
+        this.userId = userId;
+        this.email = email;
+        this.name = name;
+        this.phone = phone;
         this.role = role;
     }
 
@@ -58,5 +69,21 @@ public class AuthResponse {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

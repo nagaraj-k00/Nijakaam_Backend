@@ -6,6 +6,8 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Document(collection = "job_applications")
 @CompoundIndex(
@@ -25,6 +27,17 @@ public class JobApplication {
     private String applicationMessage;
 
     private ApplicationStatus status = ApplicationStatus.PENDING;
+
+    // Enriched worker & job details for employer visibility
+    private String workerName;
+    private String workerPhone;
+    private String workerEmail;
+    private String workerLocation;
+    private List<String> workerSkills = new ArrayList<>();
+    private Double workerRating;
+    private String workerAvatarUrl;
+    private Integer experienceYears;
+    private String jobTitle;
 
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
@@ -106,5 +119,77 @@ public class JobApplication {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getWorkerName() {
+        return workerName;
+    }
+
+    public void setWorkerName(String workerName) {
+        this.workerName = workerName;
+    }
+
+    public String getWorkerPhone() {
+        return workerPhone;
+    }
+
+    public void setWorkerPhone(String workerPhone) {
+        this.workerPhone = workerPhone;
+    }
+
+    public String getWorkerEmail() {
+        return workerEmail;
+    }
+
+    public void setWorkerEmail(String workerEmail) {
+        this.workerEmail = workerEmail;
+    }
+
+    public String getWorkerLocation() {
+        return workerLocation;
+    }
+
+    public void setWorkerLocation(String workerLocation) {
+        this.workerLocation = workerLocation;
+    }
+
+    public List<String> getWorkerSkills() {
+        return workerSkills;
+    }
+
+    public void setWorkerSkills(List<String> workerSkills) {
+        this.workerSkills = workerSkills;
+    }
+
+    public Double getWorkerRating() {
+        return workerRating;
+    }
+
+    public void setWorkerRating(Double workerRating) {
+        this.workerRating = workerRating;
+    }
+
+    public String getWorkerAvatarUrl() {
+        return workerAvatarUrl;
+    }
+
+    public void setWorkerAvatarUrl(String workerAvatarUrl) {
+        this.workerAvatarUrl = workerAvatarUrl;
+    }
+
+    public Integer getExperienceYears() {
+        return experienceYears;
+    }
+
+    public void setExperienceYears(Integer experienceYears) {
+        this.experienceYears = experienceYears;
+    }
+
+    public String getJobTitle() {
+        return jobTitle;
+    }
+
+    public void setJobTitle(String jobTitle) {
+        this.jobTitle = jobTitle;
     }
 }

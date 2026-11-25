@@ -167,6 +167,26 @@ public class JobServiceImpl implements JobService {
         existingJob.setBudget(updatedJob.getBudget());
         existingJob.setLocation(updatedJob.getLocation());
 
+        if (updatedJob.getCategory() != null) {
+            existingJob.setCategory(updatedJob.getCategory());
+        }
+        if (updatedJob.getOpenings() != null) {
+            existingJob.setOpenings(updatedJob.getOpenings());
+        }
+        if (updatedJob.getEngagementModel() != null) {
+            existingJob.setEngagementModel(updatedJob.getEngagementModel());
+        }
+        if (updatedJob.getExperienceLevel() != null) {
+            existingJob.setExperienceLevel(updatedJob.getExperienceLevel());
+        }
+        if (updatedJob.getWageCadence() != null) {
+            existingJob.setWageCadence(updatedJob.getWageCadence());
+        }
+        if (updatedJob.getShiftTiming() != null) {
+            existingJob.setShiftTiming(updatedJob.getShiftTiming());
+        }
+        existingJob.setUrgent(updatedJob.isUrgent());
+
         // Preserve employerId, status, createdAt and job ID
         existingJob.setUpdatedAt(LocalDateTime.now());
 
@@ -226,6 +246,21 @@ public class JobServiceImpl implements JobService {
         // 5. Job status filtering
         if (criteria.getStatus() != null) {
             query.addCriteria(Criteria.where("status").is(criteria.getStatus()));
+        }
+
+        // 6. Category filtering
+        if (criteria.getCategory() != null && !criteria.getCategory().isBlank()) {
+            query.addCriteria(Criteria.where("category").regex(Pattern.quote(criteria.getCategory().trim()), "i"));
+        }
+
+        // 7. Engagement model filtering
+        if (criteria.getEngagementModel() != null && !criteria.getEngagementModel().isBlank()) {
+            query.addCriteria(Criteria.where("engagementModel").regex(Pattern.quote(criteria.getEngagementModel().trim()), "i"));
+        }
+
+        // 8. Urgent filtering
+        if (criteria.getUrgent() != null) {
+            query.addCriteria(Criteria.where("urgent").is(criteria.getUrgent()));
         }
 
         // Execute count directly in MongoDB

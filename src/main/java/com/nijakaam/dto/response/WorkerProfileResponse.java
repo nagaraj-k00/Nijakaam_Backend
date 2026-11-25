@@ -13,6 +13,10 @@ public class WorkerProfileResponse {
     private List<String> skills = new ArrayList<>();
     private Integer experienceYears;
     private Double hourlyRate;
+    private Double dailyRate;
+    private List<String> certifications = new ArrayList<>();
+    private String preferredShift;
+    private String avatarUrl;
     private String bio;
     private String location;
     private boolean available;
@@ -43,7 +47,7 @@ public class WorkerProfileResponse {
         if (profile == null) {
             return null;
         }
-        return new WorkerProfileResponse(
+        WorkerProfileResponse response = new WorkerProfileResponse(
                 profile.getId(),
                 profile.getUserId(),
                 profile.getSkills(),
@@ -56,6 +60,13 @@ public class WorkerProfileResponse {
                 profile.getCreatedAt(),
                 profile.getUpdatedAt()
         );
+        response.setDailyRate(profile.getDailyRate());
+        if (profile.getCertifications() != null) {
+            response.setCertifications(new ArrayList<>(profile.getCertifications()));
+        }
+        response.setPreferredShift(profile.getPreferredShift());
+        response.setAvatarUrl(profile.getAvatarUrl());
+        return response;
     }
 
     public String getId() {
@@ -144,5 +155,37 @@ public class WorkerProfileResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Double getDailyRate() {
+        return dailyRate;
+    }
+
+    public void setDailyRate(Double dailyRate) {
+        this.dailyRate = dailyRate;
+    }
+
+    public List<String> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(List<String> certifications) {
+        this.certifications = certifications != null ? certifications : new ArrayList<>();
+    }
+
+    public String getPreferredShift() {
+        return preferredShift;
+    }
+
+    public void setPreferredShift(String preferredShift) {
+        this.preferredShift = preferredShift;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

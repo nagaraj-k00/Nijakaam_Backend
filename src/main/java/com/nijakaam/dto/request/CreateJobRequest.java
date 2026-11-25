@@ -28,6 +28,14 @@ public class CreateJobRequest {
     @Size(max = 150, message = "Location cannot exceed 150 characters")
     private String location;
 
+    private String category;
+    private Integer openings;
+    private String engagementModel;
+    private String experienceLevel;
+    private String wageCadence;
+    private String shiftTiming;
+    private Boolean urgent;
+
     public CreateJobRequest() {
     }
 
@@ -69,5 +77,61 @@ public class CreateJobRequest {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public Integer getOpenings() {
+        return openings;
+    }
+
+    public void setOpenings(Integer openings) {
+        this.openings = openings;
+    }
+
+    public String getEngagementModel() {
+        return engagementModel;
+    }
+
+    public void setEngagementModel(String engagementModel) {
+        this.engagementModel = engagementModel;
+    }
+
+    public String getExperienceLevel() {
+        return experienceLevel;
+    }
+
+    public void setExperienceLevel(String experienceLevel) {
+        this.experienceLevel = experienceLevel;
+    }
+
+    public String getWageCadence() {
+        return wageCadence;
+    }
+
+    public void setWageCadence(String wageCadence) {
+        this.wageCadence = wageCadence;
+    }
+
+    public String getShiftTiming() {
+        return shiftTiming;
+    }
+
+    public void setShiftTiming(String shiftTiming) {
+        this.shiftTiming = shiftTiming;
+    }
+
+    public Boolean getUrgent() {
+        return urgent;
+    }
+
+    public void setUrgent(Boolean urgent) {
+        this.urgent = urgent;
     }
 }

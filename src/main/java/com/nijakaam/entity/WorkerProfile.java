@@ -20,6 +20,10 @@ public class WorkerProfile {
     private List<String> skills = new ArrayList<>();
     private Integer experienceYears;
     private Double hourlyRate;
+    private Double dailyRate;
+    private List<String> certifications = new ArrayList<>();
+    private String preferredShift;
+    private String avatarUrl;
     private String bio;
     private String location;
     private boolean available = true;
@@ -130,5 +134,37 @@ public class WorkerProfile {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Double getDailyRate() {
+        return dailyRate;
+    }
+
+    public void setDailyRate(Double dailyRate) {
+        this.dailyRate = dailyRate;
+    }
+
+    public List<String> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(List<String> certifications) {
+        this.certifications = certifications != null ? certifications : new ArrayList<>();
+    }
+
+    public String getPreferredShift() {
+        return preferredShift;
+    }
+
+    public void setPreferredShift(String preferredShift) {
+        this.preferredShift = preferredShift;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

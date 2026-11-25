@@ -50,6 +50,9 @@ public class JobController {
             @RequestParam(required = false) Double minBudget,
             @RequestParam(required = false) Double maxBudget,
             @RequestParam(required = false) JobStatus status,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String engagementModel,
+            @RequestParam(required = false) Boolean urgent,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -57,6 +60,9 @@ public class JobController {
 
         JobSearchCriteria criteria = new JobSearchCriteria(
                 keyword, skill, location, minBudget, maxBudget, status, page, size, sortBy, sortDir);
+        criteria.setCategory(category);
+        criteria.setEngagementModel(engagementModel);
+        criteria.setUrgent(urgent);
 
         PagedResponse<JobResponse> result = jobService.searchJobs(criteria);
 
@@ -145,6 +151,21 @@ public class JobController {
         job.setSkillsRequired(request.getSkillsRequired());
         job.setBudget(request.getBudget());
         job.setLocation(request.getLocation());
+        job.setCategory(request.getCategory());
+        if (request.getOpenings() != null) {
+            job.setOpenings(request.getOpenings());
+        }
+        if (request.getEngagementModel() != null) {
+            job.setEngagementModel(request.getEngagementModel());
+        }
+        job.setExperienceLevel(request.getExperienceLevel());
+        if (request.getWageCadence() != null) {
+            job.setWageCadence(request.getWageCadence());
+        }
+        job.setShiftTiming(request.getShiftTiming());
+        if (request.getUrgent() != null) {
+            job.setUrgent(request.getUrgent());
+        }
 
         return job;
     }

@@ -10,6 +10,9 @@ public class JobSearchCriteria {
     private Double minBudget;
     private Double maxBudget;
     private JobStatus status;
+    private String category;
+    private String engagementModel;
+    private Boolean urgent;
     private int page = 0;
     private int size = 10;
     private String sortBy = "createdAt";
@@ -111,5 +114,29 @@ public class JobSearchCriteria {
 
     public void setSortDir(String sortDir) {
         this.sortDir = sortDir;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getEngagementModel() {
+        return engagementModel;
+    }
+
+    public void setEngagementModel(String engagementModel) {
+        this.engagementModel = engagementModel;
+    }
+
+    public Boolean getUrgent() {
+        return urgent;
+    }
+
+    public void setUrgent(Boolean urgent) {
+        this.urgent = urgent;
     }
 }

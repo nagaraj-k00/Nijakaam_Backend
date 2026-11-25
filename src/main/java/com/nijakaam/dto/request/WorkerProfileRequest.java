@@ -24,6 +24,11 @@ public class WorkerProfileRequest {
     @Size(max = 2000, message = "Bio cannot exceed 2000 characters")
     private String bio;
 
+    private Double dailyRate;
+    private List<String> certifications;
+    private String preferredShift;
+    private String avatarUrl;
+
     @NotBlank(message = "Location is required")
     @Size(min = 2, max = 150, message = "Location must be between 2 and 150 characters")
     private String location;
@@ -99,5 +104,37 @@ public class WorkerProfileRequest {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public Double getDailyRate() {
+        return dailyRate;
+    }
+
+    public void setDailyRate(Double dailyRate) {
+        this.dailyRate = dailyRate;
+    }
+
+    public List<String> getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(List<String> certifications) {
+        this.certifications = certifications;
+    }
+
+    public String getPreferredShift() {
+        return preferredShift;
+    }
+
+    public void setPreferredShift(String preferredShift) {
+        this.preferredShift = preferredShift;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

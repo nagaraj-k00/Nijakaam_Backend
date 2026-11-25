@@ -50,6 +50,16 @@ public class WorkerProfileController {
         return ResponseEntity.ok(ApiResponse.success("Worker profile retrieved successfully", WorkerProfileResponse.fromEntity(profile)));
     }
 
+    // Update current authenticated worker's profile
+    @PutMapping
+    public ResponseEntity<ApiResponse<WorkerProfileResponse>> updateMyProfile(
+            @Valid @RequestBody WorkerProfileRequest request) {
+
+        WorkerProfile updatedProfile = workerProfileService.updateProfile(null, request);
+
+        return ResponseEntity.ok(ApiResponse.success("Worker profile updated successfully", WorkerProfileResponse.fromEntity(updatedProfile)));
+    }
+
     // Update worker profile
     @PutMapping("/{userId}")
     public ResponseEntity<ApiResponse<WorkerProfileResponse>> updateProfile(

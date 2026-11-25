@@ -24,6 +24,17 @@ public class EmployerProfileRequest {
     @Size(max = 100, message = "Industry cannot exceed 100 characters")
     private String industry;
 
+    private String gstin;
+    private String msmeUdyamNumber;
+    private String orgScale;
+    private String contactName;
+    private String contactPhone;
+    private String contactEmail;
+    private String contactDesignation;
+    private String logoUrl;
+    private String bannerUrl;
+    private Double escrowBalance;
+
     // Optional field: backend ignores client-supplied userId to prevent ownership hijacking
     private String userId;
 
@@ -84,5 +95,85 @@ public class EmployerProfileRequest {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getGstin() {
+        return gstin;
+    }
+
+    public void setGstin(String gstin) {
+        this.gstin = gstin;
+    }
+
+    public String getMsmeUdyamNumber() {
+        return msmeUdyamNumber;
+    }
+
+    public void setMsmeUdyamNumber(String msmeUdyamNumber) {
+        this.msmeUdyamNumber = msmeUdyamNumber;
+    }
+
+    public String getOrgScale() {
+        return orgScale;
+    }
+
+    public void setOrgScale(String orgScale) {
+        this.orgScale = orgScale;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getContactDesignation() {
+        return contactDesignation;
+    }
+
+    public void setContactDesignation(String contactDesignation) {
+        this.contactDesignation = contactDesignation;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+
+    public void setBannerUrl(String bannerUrl) {
+        this.bannerUrl = bannerUrl;
+    }
+
+    public Double getEscrowBalance() {
+        return escrowBalance;
+    }
+
+    public void setEscrowBalance(Double escrowBalance) {
+        this.escrowBalance = escrowBalance;
     }
 }

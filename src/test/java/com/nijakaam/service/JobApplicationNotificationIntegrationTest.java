@@ -46,6 +46,9 @@ class JobApplicationNotificationIntegrationTest {
     private UserRepository userRepository;
 
     @Mock
+    private com.nijakaam.repository.WorkerProfileRepository workerProfileRepository;
+
+    @Mock
     private NotificationService notificationService;
 
     @InjectMocks
